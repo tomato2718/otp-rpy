@@ -1,4 +1,5 @@
 mod base32string;
+pub mod hotp;
 mod otp;
 
-pub use otp::generate;
+pub use base32string::{Base32String, ValidationError};

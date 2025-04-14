@@ -27,7 +27,6 @@ fn generate_mac_value(secret: &[u8], message: &[u8; 8]) -> [u8; 20] {
 
 fn generate_code(hmac: &[u8; 20]) -> u32 {
     let offset = (hmac[19] & 0xf) as usize;
-    println!("{}", offset);
     ((hmac[offset] & 0x7f) as u32) << 24
         | ((hmac[offset + 1] & 0xff) as u32) << 16
         | ((hmac[offset + 2] & 0xff) as u32) << 8

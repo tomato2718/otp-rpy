@@ -44,7 +44,6 @@ impl Base32String {
     }
 }
 
-#[derive(Debug)]
 pub struct ValidationError(&'static str);
 
 impl ValidationError {

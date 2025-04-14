@@ -1,16 +1,42 @@
 pub struct Base32String(String);
 
 impl Base32String {
+    const VALIDATION_ERROR: ValidationError = ValidationError("Invalid Base32 string");
+
     pub fn from(s: &str) -> Result<Self, ValidationError> {
-        if s.chars()
-            .all(|char| (char >= 'A' && char <= 'Z') || (char >= '2' && char <= '7'))
-        {
-            Ok(Base32String(s.to_string()))
-        } else {
-            Err(ValidationError(
-                "Input contains none base32 character.".to_string(),
-            ))
+        Base32String::validate_length(s)?;
+        Base32String::validate_characters(s)?;
+        Base32String::validate_padding(s)?;
+
+        Ok(Base32String(s.to_string()))
+    }
+
+    fn validate_length(s: &str) -> Result<(), ValidationError> {
+        if s.len() % 8 != 0 {
+            return Err(Base32String::VALIDATION_ERROR);
         }
+        Ok(())
+    }
+
+    fn validate_characters(s: &str) -> Result<(), ValidationError> {
+        if !s
+            .chars()
+            .all(|c| (c >= 'A' && c <= 'Z') || (c >= '2' && c <= '7') || c == '=')
+        {
+            return Err(Base32String::VALIDATION_ERROR);
+        }
+        Ok(())
+    }
+
+    fn validate_padding(s: &str) -> Result<(), ValidationError> {
+        if let Some(padding_start) = s.find('=') {
+            if !(vec![1, 3, 4, 6].contains(&(s.len() - padding_start))
+                && s[padding_start..].chars().all(|c| c == '='))
+            {
+                return Err(Base32String::VALIDATION_ERROR);
+            }
+        }
+        Ok(())
     }
 
     pub fn to_str(&self) -> &str {
@@ -19,7 +45,7 @@ impl Base32String {
 }
 
 #[derive(Debug)]
-pub struct ValidationError(String);
+pub struct ValidationError(&'static str);
 
 impl ValidationError {
     pub fn msg(&self) -> &str {
@@ -33,15 +59,23 @@ mod test_base32_string {
 
     #[test]
     fn from_given_base32_str_should_return_instance() {
-        let b32str = Base32String::from("TEST");
+        let test_cases = vec!["TESTTEST", "TESTTES=", "TESTT===", "TEST====", "TE======"];
 
-        assert!(b32str.is_ok());
+        for s in test_cases {
+            let b32str = Base32String::from(s);
+
+            assert!(b32str.is_ok());
+        }
     }
 
     #[test]
     fn from_given_none_base32_str_should_return_validation_error() {
-        let err = Base32String::from("invalid");
+        let test_cases = vec!["TEST", "TESTTE=T", "TESTTE=="];
 
-        assert!(err.is_err());
+        for s in test_cases {
+            let err = Base32String::from(s);
+
+            assert!(err.is_err());
+        }
     }
 }

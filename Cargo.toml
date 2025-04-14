@@ -9,4 +9,7 @@ name = "otp_rpy"
 crate-type = ["cdylib"]
 
 [dependencies]
+base32 = "0.5.1"
+hmac = "0.12.1"
 pyo3 = "0.24.0"
+sha1 = "0.10.6"

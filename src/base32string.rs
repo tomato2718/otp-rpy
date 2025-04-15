@@ -47,8 +47,8 @@ impl Base32String {
 pub struct ValidationError(&'static str);
 
 impl ValidationError {
-    pub fn msg(&self) -> &str {
-        &self.0
+    pub fn msg(&self) -> String {
+        self.0.to_string()
     }
 }
 
